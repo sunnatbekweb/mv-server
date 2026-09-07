@@ -19,6 +19,19 @@ export async function getAllMovies({
 	}
 }
 
+export async function getGenreStats() {
+	const db = getDatabase()
+
+	const pipeline = [
+		{ $unwind: '$genres' },
+		{ $group: { _id: '$genres', count: { $sum: 1 } } },
+		{ $sort: { $count: -1 } },
+		{ $project: { _id: 0, genre: '$_id', count: 1 } }
+	]
+
+	return db.collection('movies').aggregate(pipeline).toArray()
+}
+
 export async function getMovieById(id) {
 	const db = getDatabase()
 	return db.collection('movies').findOne({ _id: new ObjectId(id) })
