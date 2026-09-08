@@ -19,6 +19,26 @@ export async function getAllMovies({
 	}
 }
 
+export async function getGenreStats() {
+	const db = getDatabase()
+
+	const pipeline = [
+		// 1. Разворачиваем массив genres: один фильм с 2 жанрами -> 2 отдельных документа
+		{ $unwind: '$genres' },
+
+		// 2. Группируем по значению жанра, считаем количество в каждой группе
+		{ $group: { _id: '$genres', count: { $sum: 1 } } },
+
+		// 3. Сортируем по убыванию количества
+		{ $sort: { count: -1 } },
+
+		// 4. Переименовываем _id в genre для более понятного ответа клиенту
+		{ $project: { _id: 0, genre: '$_id', count: 1 } }
+	]
+
+	return db.collection('movies').aggregate(pipeline).toArray()
+}
+
 export async function getMovieById(id) {
 	const db = getDatabase()
 	return db.collection('movies').findOne({ _id: new ObjectId(id) })
