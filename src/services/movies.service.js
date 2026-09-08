@@ -23,9 +23,16 @@ export async function getGenreStats() {
 	const db = getDatabase()
 
 	const pipeline = [
+		// 1. Разворачиваем массив genres: один фильм с 2 жанрами -> 2 отдельных документа
 		{ $unwind: '$genres' },
+
+		// 2. Группируем по значению жанра, считаем количество в каждой группе
 		{ $group: { _id: '$genres', count: { $sum: 1 } } },
-		{ $sort: { $count: -1 } },
+
+		// 3. Сортируем по убыванию количества
+		{ $sort: { count: -1 } },
+
+		// 4. Переименовываем _id в genre для более понятного ответа клиенту
 		{ $project: { _id: 0, genre: '$_id', count: 1 } }
 	]
 

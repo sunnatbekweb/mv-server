@@ -28,6 +28,16 @@ export async function getMovies(req, res) {
 	}
 }
 
+export async function getGenreStats(req, res) {
+	try {
+		const stats = await moviesService.getGenreStats()
+		res.status(200).json(stats)
+	} catch (error) {
+		console.error(error)
+		res.status(500).json({ error: 'Не удалось получить статистику по жанрам' })
+	}
+}
+
 export async function getMovieById(req, res) {
 	try {
 		const { id } = req.params
