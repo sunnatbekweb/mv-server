@@ -7,7 +7,14 @@ export function validate(schema, source = 'body') {
 			return res.status(400).json({ error: message })
 		}
 
-		req[source] = result.data
+		if (source === 'query') {
+			// req.query в Express 5 — getter-only, поэтому мутируем объект, а не переприсваиваем
+			Object.keys(req.query).forEach(key => delete req.query[key])
+			Object.assign(req.query, result.data)
+		} else {
+			req[source] = result.data
+		}
+
 		next()
 	}
 }
